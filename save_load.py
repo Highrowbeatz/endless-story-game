@@ -2,15 +2,10 @@
 # This file contains save and load functionalities for the Endless Story Game.
 
 import json
-import os
 
 def save_story(file_name, story):
     """
     Saves the current story to a JSON file.
-    
-    Args:
-        file_name (str): The name of the file to save the story.
-        story (str): The story to save.
     """
     try:
         with open(file_name, 'w') as file:
@@ -19,15 +14,9 @@ def save_story(file_name, story):
     except Exception as e:
         print(f"An error occurred while saving the story: {e}")
 
-def load_story(file_name):
+def load_game(file_name):  # Renamed from load_story
     """
     Loads a story from a JSON file.
-    
-    Args:
-        file_name (str): The name of the file to load the story from.
-
-    Returns:
-        str: The loaded story, or an empty string if an error occurs.
     """
     try:
         with open(file_name, 'r') as file:
@@ -43,12 +32,6 @@ def load_story(file_name):
 def list_saves(directory="."):
     """
     Lists all available save files (JSON files) in the specified directory.
-    
-    Args:
-        directory (str): The directory to search for save files. Defaults to the current directory.
-
-    Returns:
-        list: A list of save file names.
     """
     try:
         return [f for f in os.listdir(directory) if f.endswith(".json")]
@@ -61,13 +44,9 @@ if __name__ == "__main__":
     file_name = "story.json"
     current_story = "Once upon a time, there was a brave coder."
     
-    # Save the story
     save_story(file_name, current_story)
-    
-    # Load the story
-    loaded_story = load_story(file_name)
+    loaded_story = load_game(file_name)  # Updated to use load_game
     print("Loaded story:", loaded_story)
     
-    # List available saves
     saves = list_saves()
     print("Available save files:", saves)
