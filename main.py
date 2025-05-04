@@ -2,21 +2,21 @@ from game_mechanics import add_to_story, is_valid_sentence
 from save_load import list_saves, load_game, save_story
 from dotenv import load_dotenv
 import os
-import openai
 import random
+from openai import OpenAI
 
 # Load environment variables from the .env file
 load_dotenv()
 
-# Retrieve the OpenAI API key from the environment
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Instantiate the OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def generate_ai_story_segment(current_story):
     """
     Generates the next part of the story using OpenAI's GPT model.
     """
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
@@ -30,7 +30,8 @@ def generate_ai_story_segment(current_story):
             ],
             max_tokens=150
         )
-        return response['choices'][0]['message']['content'].strip()
+        # Extract the AI response text
+        return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Error generating AI story segment: {e}")
         # Fallback to a predefined story segment in case of an error
