@@ -1,6 +1,31 @@
-from game_mechanics import add_to_story
-from save_load import list_saves, load_game
+from game_mechanics import add_to_story, is_valid_sentence
+from save_load import list_saves, load_game, save_game
 import random
+
+def start_game():
+    """
+    Starts a new story and manages the game loop.
+    """
+    story = "Once upon a time"
+    print("Your story begins:")
+    print(story)
+
+    while True:
+        new_sentence = input("Add to the story (or type 'exit' to quit): ")
+        if new_sentence.lower() == "exit":
+            save_choice = input("Would you like to save your story? (yes/no): ").strip().lower()
+            if save_choice == "yes":
+                save_name = input("Enter a name for your save file: ").strip()
+                save_game(save_name, story)
+            print("Thank you for playing!")
+            break
+
+        if is_valid_sentence(new_sentence):
+            story = add_to_story(story, new_sentence)
+            print("Updated story:")
+            print(story)
+        else:
+            print("Invalid sentence. Please try again!")
 
 def main_menu():
     print("Welcome to the Endless Story Game!")
