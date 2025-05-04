@@ -1,5 +1,5 @@
 from game_mechanics import add_to_story, is_valid_sentence
-from save_load import list_saves, load_game, save_game
+from save_load import list_saves, load_game, save_story
 import random
 
 def start_game():
@@ -16,7 +16,7 @@ def start_game():
             save_choice = input("Would you like to save your story? (yes/no): ").strip().lower()
             if save_choice == "yes":
                 save_name = input("Enter a name for your save file: ").strip()
-                save_game(save_name, story)
+                save_story(save_name, story)
             print("Thank you for playing!")
             break
 
