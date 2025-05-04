@@ -1,4 +1,4 @@
-from game_mechanics import start_game
+from game_mechanics import add_to_story
 from save_load import list_saves, load_game
 import random
 
