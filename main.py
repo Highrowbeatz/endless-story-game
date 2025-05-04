@@ -1,58 +1,49 @@
-import random
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
-
-# Load environment variables from a .env file
-load_dotenv()
-
-# Retrieve the OpenAI API key from environment variables
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    print("Error: OPENAI_API_KEY environment variable is not set.")
-    exit(1)
-
-# Instantiate the OpenAI client
-client = OpenAI(api_key=api_key)
-
-def generate_ai_story_segment(client, current_story):
-    """
-    Generates the next part of the story using OpenAI's GPT model.
-    Falls back to a predefined story segment in case of an error.
-    """
-    try:
-        # Use the best available model for story generation
-        response = client.chat.completions.create(
-            model="gpt-4.1",  # Replace this with a model available to you
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a creative storytelling AI. Continue the story in an immersive and engaging way."
-                },
-                {
-                    "role": "user",
-                    "content": f"Continue the following story: {current_story}"
-                }
-            ],
-            max_tokens=150  # Adjust token limit as needed
-        )
-        # Extract the AI-generated story segment
-        return response.choices[0].message.content.strip()
-
-    except Exception as e:
-        print(f"Error generating AI story segment: {e}")
-        # Fallback predefined story segments
-        return random.choice([
-            "The sun set beautifully as the horizon painted itself in hues of orange and purple.",
-            "A mysterious figure appeared in the distance, carrying a lantern that flickered in the wind.",
-            "Suddenly, a loud roar echoed through the forest, sending chills down their spine.",
-        ])
+from story_generator_with_npcs import generate_story_with_npcs, interact_with_npc, NPC
 
 def main():
-    current_story = "Once upon a time, in a land far, far away..."
-    next_segment = generate_ai_story_segment(client, current_story)
-    print("Next segment of the story:")
-    print(next_segment)
+    # Initialize NPCs
+    npc_list = [
+        NPC(name="Alex", gender="Male"),
+        NPC(name="Sophia", gender="Female"),
+    ]
+
+    # Initial story setup
+    current_story = "Once upon a time in a magical kingdom, a brave adventurer set out on a quest."
+
+    while True:
+        # Display the NPCs
+        print("\nNPCs:")
+        for i, npc in enumerate(npc_list, 1):
+            print(f"{i}. {npc.name} ({npc.get_relationship_status()})")
+
+        # Ask the user to choose an NPC to interact with
+        npc_choice = input("Choose an NPC to interact with (1-2 or 'q' to quit): ").strip()
+        if npc_choice.lower() == 'q':
+            print("Thanks for playing!")
+            break
+
+        try:
+            npc_index = int(npc_choice) - 1
+            selected_npc = npc_list[npc_index]
+
+            # Display interaction choices
+            print("\nHow would you like to interact?")
+            print("1. Be kind")
+            print("2. Be rude")
+            print("3. Flirt")
+            interaction_choice = int(input("Enter your choice (1-3): ").strip())
+
+            # Process the interaction
+            interaction_result = interact_with_npc(selected_npc, interaction_choice)
+            print(interaction_result)
+
+            # Generate the next part of the story
+            print("\nStory Continuation:")
+            current_story = generate_story_with_npcs(current_story, selected_npc)
+            print(current_story)
+
+        except (ValueError, IndexError):
+            print("Invalid choice. Please select a valid option.")
 
 if __name__ == "__main__":
     main()
