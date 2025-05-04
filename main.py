@@ -1,100 +1,58 @@
-from game_mechanics import add_to_story, is_valid_sentence
-from save_load import list_saves, load_game, save_story
-from dotenv import load_dotenv
-import os
 import random
 from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
-# Load environment variables from the .env file
+# Load environment variables from a .env file
 load_dotenv()
 
-# Instantiate the OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Retrieve the OpenAI API key from environment variables
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    print("Error: OPENAI_API_KEY environment variable is not set.")
+    exit(1)
 
-def generate_ai_story_segment(current_story):
+# Instantiate the OpenAI client
+client = OpenAI(api_key=api_key)
+
+def generate_ai_story_segment(client, current_story):
     """
     Generates the next part of the story using OpenAI's GPT model.
+    Falls back to a predefined story segment in case of an error.
     """
     try:
+        # Use the best available model for story generation
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4.1",  # Replace this with a model available to you
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a storytelling AI that continues stories in an engaging and immersive way."
+                    "content": "You are a creative storytelling AI. Continue the story in an immersive and engaging way."
                 },
                 {
                     "role": "user",
-                    "content": f"Continue the following story in an immersive and engaging way: {current_story}"
+                    "content": f"Continue the following story: {current_story}"
                 }
             ],
-            max_tokens=150
+            max_tokens=150  # Adjust token limit as needed
         )
-        # Extract the AI response text
+        # Extract the AI-generated story segment
         return response.choices[0].message.content.strip()
+
     except Exception as e:
         print(f"Error generating AI story segment: {e}")
-        # Fallback to a predefined story segment in case of an error
+        # Fallback predefined story segments
         return random.choice([
             "The sun set beautifully as the horizon painted itself in hues of orange and purple.",
             "A mysterious figure appeared in the distance, carrying a lantern that flickered in the wind.",
             "Suddenly, a loud roar echoed through the forest, sending chills down their spine.",
         ])
 
-def start_game():
-    """
-    Starts a new story and manages the game loop with AI-generated story segments.
-    """
-    story = "Once upon a time"
-    print("Your story begins:")
-    print(story)
-
-    while True:
-        new_sentence = input("Add to the story (or type 'exit' to quit): ")
-        if new_sentence.lower() == "exit":
-            save_choice = input("Would you like to save your story? (yes/no): ").strip().lower()
-            if save_choice == "yes":
-                save_name = input("Enter a name for your save file: ").strip()
-                save_story(save_name, story)
-            print("Thank you for playing!")
-            break
-
-        if is_valid_sentence(new_sentence):
-            story = add_to_story(story, new_sentence)
-            ai_segment = generate_ai_story_segment(story)
-            story = add_to_story(story, ai_segment)
-            print("Updated story:")
-            print(story)
-        else:
-            print("Invalid sentence. Please try again!")
-
-def main_menu():
-    print("Welcome to the Endless Story Game!")
-    print("1. Start a new story")
-    print("2. Load a saved game")
-    
-    choice = input("Enter your choice (1/2): ")
-    
-    if choice == "1":
-        start_game()
-    elif choice == "2":
-        saves = list_saves()
-        if not saves:
-            print("No saved games available. Starting a new story.")
-            start_game()
-        else:
-            print("Available saves:")
-            for i, save_name in enumerate(saves):
-                print(f"{i + 1}. {save_name}")
-            save_choice = input("Enter the number of the save to load: ")
-            if save_choice.isdigit() and 1 <= int(save_choice) <= len(saves):
-                save_name = saves[int(save_choice) - 1]
-                load_game(save_name)
-            else:
-                print("Invalid choice. Returning to main menu.")
-                main_menu()
-    else:
-        print("Invalid choice. Exiting game.")
+def main():
+    current_story = "Once upon a time, in a land far, far away..."
+    next_segment = generate_ai_story_segment(client, current_story)
+    print("Next segment of the story:")
+    print(next_segment)
 
 if __name__ == "__main__":
-    main_menu()
+    main()
